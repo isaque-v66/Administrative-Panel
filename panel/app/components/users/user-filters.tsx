@@ -1,6 +1,6 @@
 "use client"
 
-import type { User } from "@/app/types/user"
+
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -33,7 +33,7 @@ export function UserFilters({
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder="Search users..."
+          placeholder="Procure usuários..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           className="pl-9"
@@ -45,7 +45,7 @@ export function UserFilters({
             <SelectValue placeholder="All Roles" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Roles</SelectItem>
+            <SelectItem value="all">Cargos</SelectItem>
             <SelectItem value="Admin">Admin</SelectItem>
             <SelectItem value="Editor">Editor</SelectItem>
             <SelectItem value="Viewer">Viewer</SelectItem>
@@ -56,7 +56,7 @@ export function UserFilters({
             <SelectValue placeholder="All Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="all">Status</SelectItem>
             <SelectItem value="Active">Active</SelectItem>
             <SelectItem value="Inactive">Inactive</SelectItem>
             <SelectItem value="Pending">Pending</SelectItem>

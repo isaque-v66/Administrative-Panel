@@ -21,11 +21,11 @@ interface UserTableProps {
 
 function getStatusColor(status: User["status"]) {
   switch (status) {
-    case "Active":
+    case "ACTIVE":
       return "bg-success text-success-foreground"
-    case "Inactive":
+    case "INACTIVE":
       return "bg-muted text-muted-foreground"
-    case "Pending":
+    case "PENDING":
       return "bg-warning text-warning-foreground"
     default:
       return "bg-muted text-muted-foreground"
@@ -34,11 +34,11 @@ function getStatusColor(status: User["status"]) {
 
 function getRoleColor(role: User["role"]) {
   switch (role) {
-    case "Admin":
+    case "ADMIN":
       return "bg-accent/20 text-accent border border-accent/40"
-    case "Editor":
+    case "EDITOR":
       return "bg-primary/10 text-primary border border-primary/20"
-    case "Viewer":
+    case "VIEWER":
       return "bg-secondary text-secondary-foreground border border-border"
     default:
       return "bg-secondary text-secondary-foreground border border-border"
@@ -74,6 +74,18 @@ function formatRelativeTime(dateString: string | null) {
   if (diffInHours < 48) return "Yesterday"
   return formatDate(dateString)
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 export function UserTable({ users, onView, onEdit, onDelete }: UserTableProps) {
   return (
@@ -129,7 +141,7 @@ export function UserTable({ users, onView, onEdit, onDelete }: UserTableProps) {
                   </span>
                 </td>
                 <td className="whitespace-nowrap px-4 py-4 text-sm text-muted-foreground">
-                  {user.department}
+                  {user.departments}
                 </td>
                 <td className="whitespace-nowrap px-4 py-4">
                   <span

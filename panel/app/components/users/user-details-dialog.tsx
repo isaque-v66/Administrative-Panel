@@ -42,11 +42,11 @@ function formatDate(dateString: string | null) {
 
 function getStatusColor(status: User["status"]) {
   switch (status) {
-    case "Active":
+    case "ACTIVE":
       return "bg-success text-success-foreground"
-    case "Inactive":
+    case "INACTIVE":
       return "bg-muted text-muted-foreground"
-    case "Pending":
+    case "PENDING":
       return "bg-warning text-warning-foreground"
     default:
       return "bg-muted text-muted-foreground"
@@ -111,7 +111,7 @@ export function UserDetailsDialog({
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Department</p>
-                <p className="font-medium text-foreground">{user.department}</p>
+                <p className="font-medium text-foreground">{user.departments}</p>
               </div>
             </div>
             <div className="flex items-center gap-3 text-sm">
@@ -140,7 +140,7 @@ export function UserDetailsDialog({
               <div>
                 <p className="text-xs text-muted-foreground">Account Created</p>
                 <p className="font-medium text-foreground">
-                  {formatDate(user.createdAt)}
+                  {/* {formatDate(user.createdAt)} */}
                 </p>
               </div>
             </div>

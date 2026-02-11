@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import type { User, UserFormData } from "@/app/types/user"
 import { mockUsers } from "@/app/lib/mock-users"
 import { Button } from "@/components/ui/button"
@@ -13,7 +13,7 @@ import { UserStats } from "@/app/components/users/user-stats"
 import { Plus, Users } from "lucide-react"
 
 export default function UserManagement() {
-  const [users, setUsers] = useState<User[]>(mockUsers)
+  const [users, setUsers] = useState<User[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [roleFilter, setRoleFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -23,20 +23,31 @@ export default function UserManagement() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
-  const filteredUsers = useMemo(() => {
-    return users.filter((user) => {
-      const matchesSearch =
-        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.department.toLowerCase().includes(searchQuery.toLowerCase())
 
-      const matchesRole = roleFilter === "all" || user.role === roleFilter
-      const matchesStatus =
-        statusFilter === "all" || user.status === statusFilter
 
-      return matchesSearch && matchesRole && matchesStatus
-    })
-  }, [users, searchQuery, roleFilter, statusFilter])
+
+  useEffect(() => {
+  const fetchUsers = async () => {
+    try {
+      const req = await fetch("/api/getUsers")
+      const data = await req.json()
+
+      setUsers(data.getUsers)
+
+
+    } catch (err) {
+      console.error("Erro ao buscar usuários:", err)
+      setUsers([])
+    }
+  }
+
+  fetchUsers()
+}, [])
+
+
+
+
+  
 
   const handleCreateUser = () => {
     setSelectedUser(null)
@@ -58,35 +69,24 @@ export default function UserManagement() {
     setDeleteDialogOpen(true)
   }
 
-  const handleSaveUser = (data: UserFormData) => {
-    if (selectedUser) {
-      setUsers(
-        users.map((u) =>
-          u.id === selectedUser.id ? { ...u, ...data } : u
-        )
-      )
-    } else {
-      const newUser: User = {
-        ...data,
-        id: String(Date.now()),
-        createdAt: new Date().toISOString(),
-        lastLogin: null,
-      }
-      setUsers([newUser, ...users])
-    }
+  const handleSaveUser = (newUser: User) => {
+   setUsers(prev => [...prev, newUser] );
+   setFormDialogOpen(false);
+
+
+
   }
 
   const handleConfirmDelete = () => {
-    if (selectedUser) {
-      setUsers(users.filter((u) => u.id !== selectedUser.id))
-      setDeleteDialogOpen(false)
-      setSelectedUser(null)
-    }
+   
+
   }
 
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+
+        {/* HEADER*/}
         <header className="mb-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
@@ -95,23 +95,31 @@ export default function UserManagement() {
               </div>
               <div>
                 <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                  User Management
+                  Gerenciador de usuários
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                  Manage user accounts and permissions
+                  Gerencie usuários e permissões
                 </p>
               </div>
             </div>
             <Button onClick={handleCreateUser} className="gap-2">
               <Plus className="h-4 w-4" />
-              Add User
+              Adicionar usuário
             </Button>
           </div>
         </header>
 
-        <UserStats users={users} />
+
+
+
+
+
+
+        {/*CARDS DE USERS */}
+        {/* <UserStats users={users} /> */}
 
         <div className="mt-8 space-y-4">
+          {/*BARRA DE BUSCA/FILTROS */}
           <UserFilters
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
@@ -125,22 +133,24 @@ export default function UserManagement() {
             <p className="text-sm text-muted-foreground">
               Showing{" "}
               <span className="font-medium text-foreground">
-                {filteredUsers.length}
+                {/* {filteredUsers.length} */}
               </span>{" "}
               of{" "}
-              <span className="font-medium text-foreground">{users.length}</span>{" "}
+              {/* <span className="font-medium text-foreground">{users.length}</span>{" "} */}
               users
             </p>
           </div>
 
+          {/*TABELA*/}
           <UserTable
-            users={filteredUsers}
+            users={users}
             onView={handleViewUser}
             onEdit={handleEditUser}
             onDelete={handleDeleteUser}
           />
         </div>
 
+         {/*CARD PARA ADICIONAR USUÁRIO*/}
         <UserFormDialog
           open={formDialogOpen}
           onOpenChange={setFormDialogOpen}
@@ -148,12 +158,14 @@ export default function UserManagement() {
           onSave={handleSaveUser}
         />
 
+        {/*CARD DE DETALHES */}
         <UserDetailsDialog
           open={detailsDialogOpen}
           onOpenChange={setDetailsDialogOpen}
           user={selectedUser}
         />
 
+        {/*DELETE*/}
         <DeleteUserDialog
           open={deleteDialogOpen}
           onOpenChange={setDeleteDialogOpen}

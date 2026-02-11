@@ -10,9 +10,9 @@ interface UserStatsProps {
 
 export function UserStats({ users }: UserStatsProps) {
   const totalUsers = users.length
-  const activeUsers = users.filter((u) => u.status === "Active").length
-  const inactiveUsers = users.filter((u) => u.status === "Inactive").length
-  const pendingUsers = users.filter((u) => u.status === "Pending").length
+  const activeUsers = users.filter((u) => u.status === "ACTIVE").length
+  const inactiveUsers = users.filter((u) => u.status === "INACTIVE").length
+  const pendingUsers = users.filter((u) => u.status === "PENDING").length
 
   const stats = [
     {
