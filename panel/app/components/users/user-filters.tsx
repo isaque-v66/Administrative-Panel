@@ -10,6 +10,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Search } from "lucide-react"
+import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useEffect } from "react"
 
 interface UserFiltersProps {
   searchQuery: string
@@ -18,16 +20,60 @@ interface UserFiltersProps {
   onRoleFilterChange: (role: string) => void
   statusFilter: string
   onStatusFilterChange: (status: string) => void
+
 }
 
-export function UserFilters({
-  searchQuery,
-  onSearchChange,
-  roleFilter,
-  onRoleFilterChange,
-  statusFilter,
-  onStatusFilterChange,
+
+
+
+
+export function UserFilters({searchQuery, onSearchChange, roleFilter, onRoleFilterChange, statusFilter,onStatusFilterChange
 }: UserFiltersProps) {
+
+
+
+  
+  
+  
+//   const {data: usersFiltered = [], error} = useQuery({
+//     queryKey: ["filterUsers", searchQuery, roleFilter, statusFilter],
+//     queryFn: () => fetchUsers({
+//       searchQuery,
+//       role: roleFilter,
+//       status: statusFilter
+//     })
+//   })
+  
+  
+  
+//   useEffect(() => {
+//   if (usersFiltered) {
+//     onUsersFiltered(usersFiltered)
+//   }
+// }, [usersFiltered])
+
+
+
+
+  // async function fetchUsers(filters: {searchQuery: string, role: string, status: string}) {
+
+  //   const params = new URLSearchParams(filters)
+
+  //   const res = await fetch(`/api/usersFiltered?${params}`)
+
+  //   if(!res.ok){
+  //     throw new Error("Erro ao enviar parâmetros à API")
+  //   }
+
+  //   const data = await res.json()
+
+  //   return data.usersFiltered
+  // }
+
+
+
+
+
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
       <div className="relative flex-1">
@@ -46,9 +92,9 @@ export function UserFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Cargos</SelectItem>
-            <SelectItem value="Admin">Admin</SelectItem>
-            <SelectItem value="Editor">Editor</SelectItem>
-            <SelectItem value="Viewer">Viewer</SelectItem>
+            <SelectItem value="ADMIN">Admin</SelectItem>
+            <SelectItem value="EDITOR">Editor</SelectItem>
+            <SelectItem value="VIEWER">Viewer</SelectItem>
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={onStatusFilterChange}>
@@ -57,9 +103,9 @@ export function UserFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Status</SelectItem>
-            <SelectItem value="Active">Active</SelectItem>
-            <SelectItem value="Inactive">Inactive</SelectItem>
-            <SelectItem value="Pending">Pending</SelectItem>
+            <SelectItem value="ACTIVE">Active</SelectItem>
+            <SelectItem value="INACTIVE">Inactive</SelectItem>
+            <SelectItem value="PENDING">Pending</SelectItem>
           </SelectContent>
         </Select>
       </div>

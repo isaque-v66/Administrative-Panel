@@ -1,8 +1,7 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
-import type { User, UserFormData } from "@/app/types/user"
-import { mockUsers } from "@/app/lib/mock-users"
+import { useState } from "react"
+import type { User } from "@/app/types/user"
 import { Button } from "@/components/ui/button"
 import { UserTable } from "@/app/components/users/user-table"
 import { UserFormDialog } from "@/app/components/users/user-form-dialog"
@@ -11,9 +10,11 @@ import { DeleteUserDialog } from "@/app/components/users/delete-user-dialog"
 import { UserFilters } from "@/app/components/users/user-filters"
 import { UserStats } from "@/app/components/users/user-stats"
 import { Plus, Users } from "lucide-react"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 
 export default function UserManagement() {
-  const [users, setUsers] = useState<User[]>([])
+  const queryClient = useQueryClient()
+
   const [searchQuery, setSearchQuery] = useState("")
   const [roleFilter, setRoleFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -23,31 +24,20 @@ export default function UserManagement() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
+  const { data: users = [], isLoading } = useQuery({
+    queryKey: ["users", searchQuery, roleFilter, statusFilter],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        searchQuery,
+        role: roleFilter,
+        status: statusFilter,
+      })
 
-
-
-  useEffect(() => {
-  const fetchUsers = async () => {
-    try {
-      const req = await fetch("/api/getUsers")
-      const data = await req.json()
-
-      setUsers(data.getUsers)
-
-
-    } catch (err) {
-      console.error("Erro ao buscar usuários:", err)
-      setUsers([])
-    }
-  }
-
-  fetchUsers()
-}, [])
-
-
-
-
-  
+      const res = await fetch(`/api/usersFiltered?${params}`)
+      const data = await res.json()
+      return data.usersFiltered as User[]
+    },
+  })
 
   const handleCreateUser = () => {
     setSelectedUser(null)
@@ -69,24 +59,21 @@ export default function UserManagement() {
     setDeleteDialogOpen(true)
   }
 
-  const handleSaveUser = (newUser: User) => {
-   setUsers(prev => [...prev, newUser] );
-   setFormDialogOpen(false);
-
-
-
+  //  depois de salvar no backend
+  const handleSaveUser = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["users"] })
+    setFormDialogOpen(false)
   }
 
-  const handleConfirmDelete = () => {
-   
-
+  // depois de deletar no backend
+  const handleConfirmDelete = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["users"] })
+    setDeleteDialogOpen(false)
   }
 
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-
-        {/* HEADER*/}
         <header className="mb-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
@@ -102,6 +89,7 @@ export default function UserManagement() {
                 </p>
               </div>
             </div>
+
             <Button onClick={handleCreateUser} className="gap-2">
               <Plus className="h-4 w-4" />
               Adicionar usuário
@@ -109,17 +97,9 @@ export default function UserManagement() {
           </div>
         </header>
 
-
-
-
-
-
-
-        {/*CARDS DE USERS */}
-        {/* <UserStats users={users} /> */}
+        <UserStats users={users} />
 
         <div className="mt-8 space-y-4">
-          {/*BARRA DE BUSCA/FILTROS */}
           <UserFilters
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
@@ -133,24 +113,24 @@ export default function UserManagement() {
             <p className="text-sm text-muted-foreground">
               Showing{" "}
               <span className="font-medium text-foreground">
-                {/* {filteredUsers.length} */}
+                {users.length}
               </span>{" "}
-              of{" "}
-              {/* <span className="font-medium text-foreground">{users.length}</span>{" "} */}
               users
             </p>
           </div>
 
-          {/*TABELA*/}
-          <UserTable
-            users={users}
-            onView={handleViewUser}
-            onEdit={handleEditUser}
-            onDelete={handleDeleteUser}
-          />
+          {isLoading ? (
+            <p>Carregando usuários...</p>
+          ) : (
+            <UserTable
+              users={users}
+              onView={handleViewUser}
+              onEdit={handleEditUser}
+              onDelete={handleDeleteUser}
+            />
+          )}
         </div>
 
-         {/*CARD PARA ADICIONAR USUÁRIO*/}
         <UserFormDialog
           open={formDialogOpen}
           onOpenChange={setFormDialogOpen}
@@ -158,14 +138,12 @@ export default function UserManagement() {
           onSave={handleSaveUser}
         />
 
-        {/*CARD DE DETALHES */}
         <UserDetailsDialog
           open={detailsDialogOpen}
           onOpenChange={setDetailsDialogOpen}
           user={selectedUser}
         />
 
-        {/*DELETE*/}
         <DeleteUserDialog
           open={deleteDialogOpen}
           onOpenChange={setDeleteDialogOpen}

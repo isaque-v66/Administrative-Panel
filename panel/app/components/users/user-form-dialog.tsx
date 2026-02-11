@@ -28,6 +28,7 @@ import { Controller, useForm } from 'react-hook-form'
 import {zodResolver} from '@hookform/resolvers/zod'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 
 interface UserFormDialogProps {
@@ -65,6 +66,7 @@ export function UserFormDialog({open, onOpenChange, user, onSave}: UserFormDialo
   })
 
 
+  const queryClient = useQueryClient()
 
 
 
@@ -130,6 +132,7 @@ export function UserFormDialog({open, onOpenChange, user, onSave}: UserFormDialo
       setDataForm(res)
       onSave(res.create)
       setCardSuccess(true)
+      await queryClient.invalidateQueries({queryKey: ["filterUsers"]})
 
 
 
