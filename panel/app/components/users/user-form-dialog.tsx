@@ -58,7 +58,7 @@ type Formtype = z.infer<typeof FormSchema>
 export function UserFormDialog({open, onOpenChange, user, onSave}: UserFormDialogProps) {  
   const [dataForm, setDataForm] = useState<Formtype>()
   const [cardSuccess, setCardSuccess] = useState<boolean>(false)
-  const {register, handleSubmit, control, formState: {errors, isLoading}} = useForm<Formtype>({
+  const {register, handleSubmit, control, formState: {errors, isSubmitting}, reset} = useForm<Formtype>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
        name: "", email: "", role: "VIEWER", status: "PENDING", departments: "ENGINEERING",
@@ -67,27 +67,24 @@ export function UserFormDialog({open, onOpenChange, user, onSave}: UserFormDialo
 
 
   const queryClient = useQueryClient()
-
-
-
-
-
-
   const isEditing = !!user
 
 
-  if(isLoading) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="100vh" 
-      >
-      <CircularProgress />
-    </Box>
-    )
+
+useEffect(() => {
+  if (user) {
+    reset({
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+      departments: user.departments,
+    })
   }
+}, [user, reset])
+
+
+
 
 
 
@@ -114,25 +111,34 @@ export function UserFormDialog({open, onOpenChange, user, onSave}: UserFormDialo
 
 
   const sendForm = async (data: Formtype) => {
-    
+
+
     try {
-      const send = await fetch("/api/createUser", {
-        method: 'POST',
+
+       const isEditing = !!user?.id
+
+       const url = isEditing ? `/api/updateUser?id=${user.id}` : `/api/createUser`
+
+       const method = isEditing ? "PUT" : "POST" 
+
+    
+      const send = await fetch(url, {
+        method,
         headers: {'Content-type': 'application/json'},
         body: JSON.stringify(data)
       })
 
 
-      if(!send) {
+      if(!send.ok) {
         throw new Error("Erro ao se comunicar com a API")
       }
 
 
       const res = await send.json()
       setDataForm(res)
-      onSave(res.create)
+      onSave(res)
       setCardSuccess(true)
-      await queryClient.invalidateQueries({queryKey: ["filterUsers"]})
+      await queryClient.invalidateQueries({queryKey: ["users"]})
 
 
 
@@ -271,7 +277,7 @@ export function UserFormDialog({open, onOpenChange, user, onSave}: UserFormDialo
             >
               Cancelar
             </Button>
-            <Button type="submit">{isLoading ? (<div><CircularProgress /></div>):("Criar usuário")}</Button>
+            <Button type="submit">{isSubmitting ? (<div><CircularProgress /></div>):("Criar usuário")}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
