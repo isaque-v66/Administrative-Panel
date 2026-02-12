@@ -10,7 +10,7 @@ import { DeleteUserDialog } from "@/app/components/users/delete-user-dialog"
 import { UserFilters } from "@/app/components/users/user-filters"
 import { UserStats } from "@/app/components/users/user-stats"
 import { Plus, Users } from "lucide-react"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 export default function UserManagement() {
   const queryClient = useQueryClient()
@@ -24,6 +24,8 @@ export default function UserManagement() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
+
+  // Query de filter
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["users", searchQuery, roleFilter, statusFilter],
     queryFn: async () => {
@@ -38,6 +40,38 @@ export default function UserManagement() {
       return data.usersFiltered as User[]
     },
   })
+
+
+
+  //Query de Delete
+
+  const deleteUserMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const params = new URLSearchParams({ id })
+
+      const res = await fetch(`/api/deleteUser?${params}`, {
+      method: "DELETE",
+    })
+
+      if(!res.ok) {
+        throw new Error("Erro ao deletar usuário")
+      }
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["users"]
+      })
+    }
+  })
+
+
+
+
+
+
+
+
 
   const handleCreateUser = () => {
     setSelectedUser(null)
@@ -65,9 +99,12 @@ export default function UserManagement() {
     setFormDialogOpen(false)
   }
 
-  // depois de deletar no backend
+ 
   const handleConfirmDelete = async () => {
-    await queryClient.invalidateQueries({ queryKey: ["users"] })
+    if(!selectedUser) return
+
+
+    deleteUserMutation.mutate(selectedUser.id)
     setDeleteDialogOpen(false)
   }
 
@@ -149,6 +186,7 @@ export default function UserManagement() {
           onOpenChange={setDeleteDialogOpen}
           user={selectedUser}
           onConfirm={handleConfirmDelete}
+          isDeleting = {deleteUserMutation.isPending}
         />
       </div>
     </div>
